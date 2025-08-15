@@ -1,0 +1,23 @@
+options:
+  logging: CLOUD_LOGGING_ONLY
+  pool:
+    name: 'projects/${PROJECT_ID}/locations/${LOCATION}/workerPools/${_PRIVATEPOOL_NAME}'
+
+steps:
+# Build the container image
+- name: 'gcr.io/cloud-builders/docker'
+  env:
+  - 'DOCKER_BUILDKIT=1'
+  args:
+  - 'build'
+  - '--platform'
+  - 'linux/amd64'
+  - '-t'
+  - '${LOCATION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY_NAME}/${_IMAGE}:latest'
+  - '-f'
+  - '${_DOCKERFILE}'
+  - '.'
+
+# Push the container image to Artifact Registry
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', '${LOCATION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY_NAME}/${_IMAGE}:latest']
